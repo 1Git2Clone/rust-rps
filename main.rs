@@ -35,7 +35,7 @@ fn handle_game(
 fn generate_game_outcomes() -> HashMap<(u8, u8), char> {
     let mut outcomes = HashMap::new();
 
-    // Define the outcomes, d = draw, w = win, l = loss
+    // d = draw, w = win, l = loss
     outcomes.insert((1, 1), 'd');
     outcomes.insert((1, 2), 'l');
     outcomes.insert((1, 3), 'w');
@@ -75,8 +75,8 @@ fn main() {
             1..=3 => {
                 let computer_choice: u8 = rng.gen_range(1..=3);
 
-                println!("Entered valid number. ({})", number);
-                println!("Computer choice: {}", computer_choice);
+                // println!("Entered valid number. ({})", number);
+                // println!("Computer choice: {}", computer_choice);
 
                 if handle_game(number, computer_choice, &mut score, &outcomes) {
                     continue;
