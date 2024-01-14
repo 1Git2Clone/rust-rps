@@ -6,30 +6,32 @@ use std::io::{self, Write};
 use std::collections::HashMap;
 use rand::Rng;
 
-// ../enums/enums.rs import
-use crate::enums::enums::GameOptions;
+// ../enums/enums.rs imports
+use crate::enums::enums::{GameOptions, GameOutcomes};
+//
+
 
 // Match the user input to the hash table's game state char.
 pub fn handle_game(
     user_choice: GameOptions,
     computer_choice: GameOptions,
     score: &mut i32,
-    outcomes: &HashMap<(GameOptions, GameOptions), char>,
+    outcomes: &HashMap<(GameOptions, GameOptions), GameOutcomes>,
 ) -> bool {
 
     match outcomes.get(&(user_choice, computer_choice)) {
         Some(result) => {
             match result {
-                &'d' => println!("Draw."),
-                &'l' => {
+                GameOutcomes::Draw => println!("Draw."),
+                GameOutcomes::Lose => {
                     println!("Loss.");
                     *score -= 1;
                 }
-                &'w' => {
+                GameOutcomes::Win => {
                     println!("Win.");
                     *score += 1;
                 }
-                _ => unreachable!(),
+                // actually unreachable with enums 
             }
         }
         None => unreachable!(),
@@ -41,22 +43,23 @@ pub fn handle_game(
 }
 
 // Tuple of two enums (../enums/enums.rs) for the player vs computer variants
-pub fn generate_game_outcomes() -> HashMap<(GameOptions, GameOptions), char> {
+pub fn generate_game_outcomes() -> HashMap<(GameOptions, GameOptions), GameOutcomes> {
+
+    use crate::enums::enums::{GameOptions::*, GameOutcomes::*};
 
     let mut outcomes = HashMap::new();
 
-    // d = draw, w = win, l = loss
-    outcomes.insert((GameOptions::Rock, GameOptions::Rock), 'd');
-    outcomes.insert((GameOptions::Rock, GameOptions::Paper), 'l');
-    outcomes.insert((GameOptions::Rock, GameOptions::Scissors), 'w');
+    outcomes.insert((Rock, Rock), Draw);
+    outcomes.insert((Rock, Paper), Lose);
+    outcomes.insert((Rock, Scissors), Win);
 
-    outcomes.insert((GameOptions::Paper, GameOptions::Rock), 'w');
-    outcomes.insert((GameOptions::Paper, GameOptions::Paper), 'd');
-    outcomes.insert((GameOptions::Paper, GameOptions::Scissors), 'l');
+    outcomes.insert((Paper, Rock), Win);
+    outcomes.insert((Paper, Paper), Draw);
+    outcomes.insert((Paper, Scissors), Lose);
 
-    outcomes.insert((GameOptions::Scissors, GameOptions::Rock), 'l');
-    outcomes.insert((GameOptions::Scissors, GameOptions::Paper), 'w');
-    outcomes.insert((GameOptions::Scissors, GameOptions::Scissors), 'd');
+    outcomes.insert((Scissors, Rock), Lose);
+    outcomes.insert((Scissors, Paper), Win);
+    outcomes.insert((Scissors, Scissors), Draw);
 
     outcomes
 
@@ -64,7 +67,7 @@ pub fn generate_game_outcomes() -> HashMap<(GameOptions, GameOptions), char> {
 
 pub fn main_game_loop(
     rng: &mut rand::rngs::ThreadRng,
-    outcomes: &HashMap<(GameOptions, GameOptions), char>,
+    outcomes: &HashMap<(GameOptions, GameOptions), GameOutcomes>,
     score: &mut i32
 ) {
     loop {
@@ -75,19 +78,22 @@ pub fn main_game_loop(
         io::stdin().read_line(&mut input)
             .expect("Failed to read line.");
 
-        let Ok(number) = input.trim().parse::<u8>() else {
-            eprintln!("Error: invalid input");
-            continue;
+        let number: u8 = match input.trim().parse() {
+            Ok(result) if result <= 3 => result,
+            _ => {
+                eprintln!("Error: invalid input");
+                continue;
+            }
         };
 
-        let user_choice = GameOptions::match_value_to_enum(number);
+        let user_choice = GameOptions::match_value_to_option(number);
 
         match user_choice {
             GameOptions::Exit => {
                 break;
             }
             GameOptions::Rock | GameOptions::Paper | GameOptions::Scissors => {
-                let computer_choice: GameOptions = GameOptions::match_value_to_enum(rng.gen_range(1..=3));
+                let computer_choice: GameOptions = GameOptions::match_value_to_option(rng.gen_range(1..=3));
 
                 // println!("Entered valid number. ({})", number);
                 // println!("Computer choice: {}", computer_choice);

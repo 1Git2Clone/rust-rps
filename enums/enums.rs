@@ -15,7 +15,7 @@ pub enum GameOptions {
 }
 
 impl GameOptions {
-    pub fn match_value_to_enum(value: u8) -> GameOptions {
+    pub fn match_value_to_option(value: u8) -> GameOptions {
         match value {
             0 => GameOptions::Exit,
             1 => GameOptions::Rock,
@@ -27,4 +27,14 @@ impl GameOptions {
             _ => unreachable!(),
         }
     }
+}
+
+
+
+pub enum GameOutcomes {
+    // The actual values don't really matter
+    // as long as they're unique
+    Lose = 0,
+    Draw = 1,
+    Win = 2,
 }
